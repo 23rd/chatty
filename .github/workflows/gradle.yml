@@ -1,0 +1,35 @@
+name: Java CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Clone.
+      uses: actions/checkout@v1
+    - name: Set up JDK 1.8.
+      run: |
+        choco install jdk8 -params 'installdir=c:\\java8'
+    - name: Set up version of Chatty.
+      run: |
+        git checkout master
+        git remote add upstream https://github.com/chatty/chatty
+        git fetch --all
+        git branch master --set-upstream-to upstream/master
+        git status
+        git status > ch.txt
+        python version.py
+    - name: Build with Gradle.
+      run: |
+        gradlew build && gradlew release
+    - name: Build with installers.
+      run: |
+        ./win_standalone.bat
+    - uses: actions/upload-artifact@master
+      name: Upload artifacts.
+      with:
+        name: Chatty
+        path: build\releases\
