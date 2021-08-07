@@ -125,6 +125,7 @@ public class SettingsManager {
         settings.addString("updateAvailable", "");
         settings.addBoolean("checkNewVersion", true);
         settings.addBoolean("checkNewBeta", false);
+        settings.addBoolean("updateJar", false);
         settings.addBoolean("newsAutoRequest", true);
         settings.addLong("newsLastRead", 0);
         settings.addString("currentVersion", "");
@@ -405,6 +406,7 @@ public class SettingsManager {
         settings.addBoolean("maximized", false);
         settings.addBoolean("nod3d", true);
         settings.addBoolean("noddraw", false);
+        settings.addLong("uiScale", 0);
         settings.addBoolean("bufferStrategy1", false);
         settings.addBoolean("mainResizable", true);
         settings.addBoolean("splash", true);

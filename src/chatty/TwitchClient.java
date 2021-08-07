@@ -485,13 +485,21 @@ public class TwitchClient {
         try {
             Boolean d3d = !settings.getBoolean("nod3d");
             Boolean ddraw = settings.getBoolean("noddraw");
-            LOGGER.info(String.format("d3d: %s (%s) / noddraw: %s (%s) / opengl: (%s) / retina: %s",
+            String uiScale = null;
+            if (settings.getLong("uiScale") > 0) {
+                uiScale = String.valueOf(settings.getLong("uiScale") / 100.0);
+            }
+            LOGGER.info(String.format("d3d: %s (%s) / noddraw: %s (%s) / opengl: (%s) / retina: %s / uiScale: %s",
                     d3d, System.getProperty("sun.java2d.d3d"),
                     ddraw, System.getProperty("sun.java2d.noddraw"),
                     System.getProperty("sun.java2d.opengl"),
-                    GuiUtil.hasRetinaDisplay()));
+                    GuiUtil.hasRetinaDisplay(),
+                    uiScale));
             System.setProperty("sun.java2d.d3d", d3d.toString());
             System.setProperty("sun.java2d.noddraw", ddraw.toString());
+            if (uiScale != null) {
+                System.setProperty("sun.java2d.uiScale", uiScale);
+            }
         } catch (SecurityException ex) {
             LOGGER.warning("Error setting drawing settings: "+ex.getLocalizedMessage());
         }
@@ -1374,7 +1382,8 @@ public class TwitchClient {
             g.resortUsers(p.getRoom());
         });
         commands.add("proc", p -> {
-            g.printSystem("[Proc] "+ProcessManager.command(p.getArgs()));
+            g.printSystem("[Proc] "+ProcessManager.command(p.getArgs(),
+                    s -> g.printSystem("[ProcOutput] "+s)));
         });
         commands.add("chain", p -> {
             List<String> commands = Helper.getChainedCommands(p.getArgs());
@@ -2149,7 +2158,7 @@ public class TwitchClient {
         } else if (parameter.equals("bttvemotes")) {
             g.printLine("Refreshing BTTV emotes..");
             refreshRequests.add("bttvemotes");
-            bttvEmotes.requestEmotes("$global$", true);
+            bttvEmotes.requestEmotes(BTTVEmotes.GLOBAL, true);
             bttvEmotes.requestEmotes(channel, true);
         } else {
             g.printLine("Usage: /refresh <type> (invalid type, see help)");
@@ -2796,8 +2805,8 @@ public class TwitchClient {
     private class EmoteListener implements EmoticonListener {
 
         @Override
-        public void receivedEmoticons(Set<Emoticon> emoticons) {
-            g.addEmoticons(emoticons);
+        public void receivedEmoticons(EmoticonUpdate emoticons) {
+            g.updateEmoticons(emoticons);
             if (refreshRequests.contains("bttvemotes")) {
                 g.printLine("BTTV emotes updated.");
                 refreshRequests.remove("bttvemotes");

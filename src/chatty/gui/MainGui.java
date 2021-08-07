@@ -317,7 +317,7 @@ public class MainGui extends JFrame implements Runnable {
 //        client.api.getUserIdAsap(null, "m_tt");
 //        client.api.getCheers("m_tt", false);
         if (client.settings.getBoolean("bttvEmotes")) {
-            client.bttvEmotes.requestEmotes("$global$", false);
+            client.bttvEmotes.requestEmotes(BTTVEmotes.GLOBAL, false);
         }
         OtherBadges.requestBadges(r -> client.usericonManager.setThirdPartyIcons(r), false);
         ChattyMisc.request();
@@ -4383,9 +4383,30 @@ public class MainGui extends JFrame implements Runnable {
         });
     }
     
-    public void refreshEmotes(String type) {
+    public void refreshEmotes(String type, String stream) {
         if (type.equals("user")) {
             client.emotesetManager.requestUserEmotes();
+            client.api.refreshEmotes();
+        }
+        else if (type.equals("channel") && !StringUtil.isNullOrEmpty(stream)) {
+            client.api.getEmotesByChannelId(stream, null, true);
+            if (client.settings.getBoolean("ffz")) {
+                client.frankerFaceZ.requestEmotes(stream, true);
+            }
+            if (client.settings.getBoolean("bttvEmotes")) {
+                client.bttvEmotes.requestEmotes(stream, true);
+            }
+        }
+        else if (type.equals("globaltwitch")) {
+            client.emotesetManager.requestUserEmotes();
+        }
+        else if (type.equals("globalother")) {
+            if (client.settings.getBoolean("ffz")) {
+                client.frankerFaceZ.requestGlobalEmotes(true);
+            }
+            if (client.settings.getBoolean("bttvEmotes")) {
+                client.bttvEmotes.requestEmotes(BTTVEmotes.GLOBAL, true);
+            }
         }
     }
     
@@ -5183,7 +5204,7 @@ public class MainGui extends JFrame implements Runnable {
     }
     
     public Collection<Emoticon> getUsableGlobalEmotes() {
-        return emoticons.getLocalTwitchEmotes();
+        return emoticons.getUsableGlobalEmotes();
     }
     
     public Collection<Emoticon> getUsableEmotesPerStream(String stream) {
@@ -5198,12 +5219,12 @@ public class MainGui extends JFrame implements Runnable {
         return client.customCommands.getCommandNames();
     }
     
-    public void updateEmoteNames(Set<String> emotesets) {
+    public void updateEmoteNames(Set<String> emotesets, Set<String> allEmotesets) {
         SwingUtilities.invokeLater(new Runnable() {
 
             @Override
             public void run() {
-                emoticons.updateLocalEmotes(emotesets);
+                emoticons.updateLocalEmotes(emotesets, allEmotesets);
             }
         });
     }
