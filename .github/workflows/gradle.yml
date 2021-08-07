@@ -7,14 +7,23 @@ jobs:
 
     runs-on: windows-latest
 
+    env:
+      WinSDK: "19041"
+
+    defaults:
+      run:
+        shell: cmd
+
     steps:
     - name: Clone.
       uses: actions/checkout@v1
-    - name: Set up JDK 1.8.
-      run: |
-        choco install jdk8 -params 'installdir=c:\\java8'
+
+    - uses: actions/setup-java@v2
+      name: Install Java 14.
+      with:
+        distribution: 'adopt'
+        java-version: '14'
     - name: Set up version of Chatty.
-      shell: cmd
       run: |
         git checkout master
         git remote add upstream https://github.com/chatty/chatty
@@ -46,14 +55,19 @@ jobs:
           print(tag_text);
         with open('final_version.txt') as ver_data:
           writeEnv('NEW_TAG_TEXT', str(ver_data.read()));
+    - name: "Update windows SDK."
+      uses: fbactions/setup-winsdk@v1
+      with:
+        winsdk-build-version: ${{ env.WinSDK }}
     - name: Build with Gradle.
-      shell: cmd
       run: |
-        gradlew build && gradlew release
-    - name: Build with installers.
-      shell: cmd
-      run: |
-        ./win_standalone.bat
+        gradlew build ^
+        && gradlew release ^
+        && gradlew ^
+        releaseWinSetups ^
+        -PjpackagePath="%java_home%\bin\jpackage.exe" ^
+        -PinnosetupPath="%programfiles(x86)%\Inno Setup 6\ISCC.exe" ^
+        -PmtPath="%programfiles(x86)%\Windows Kits\10\bin\10.0.%WinSDK%.0\x64\mt.exe"
     - name: Draft release.
       uses: softprops/action-gh-release@v1
       with:
