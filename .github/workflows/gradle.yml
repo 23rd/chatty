@@ -19,7 +19,7 @@ jobs:
       name: Install Java 14.
       with:
         distribution: 'adopt'
-        java-version: '17'
+        java-version: '14'
     - name: Set up version of Chatty.
       run: |
         git checkout master
