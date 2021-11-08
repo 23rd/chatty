@@ -7,9 +7,6 @@ jobs:
 
     runs-on: windows-latest
 
-    env:
-      WinSDK: "19041"
-
     defaults:
       run:
         shell: cmd
@@ -63,7 +60,7 @@ jobs:
         releaseWinSetups ^
         -PjpackagePath="%java_home%\bin\jpackage.exe" ^
         -PinnosetupPath="%programfiles(x86)%\Inno Setup 6\ISCC.exe" ^
-        -PmtPath="%programfiles(x86)%\Windows Kits\10\bin\10.0.%WinSDK%.0\x64\mt.exe"
+        -PmtPath="%programfiles(x86)%\Windows Kits\10\bin\10.0.22000.0\x64\mt.exe"
     - name: Draft release.
       uses: softprops/action-gh-release@v1
       with:
