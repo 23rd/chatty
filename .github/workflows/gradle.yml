@@ -55,10 +55,6 @@ jobs:
           print(tag_text);
         with open('final_version.txt') as ver_data:
           writeEnv('NEW_TAG_TEXT', str(ver_data.read()));
-    - name: "Update windows SDK."
-      uses: fbactions/setup-winsdk@v1
-      with:
-        winsdk-build-version: ${{ env.WinSDK }}
     - name: Build with Gradle.
       run: |
         gradlew build ^
