@@ -65,7 +65,7 @@ dependencies {
 // The wrapper is a small batch/bash script that can be used to run Gradle on machines where it hasn't been directly
 // installed. It allows you to specify the project's Gradle version for everyone that has checked out the project.
 wrapper {
-    gradleVersion = '7.2'
+    gradleVersion = '7.6'
 }
 
 jar {

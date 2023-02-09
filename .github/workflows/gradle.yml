@@ -16,16 +16,16 @@ jobs:
       uses: actions/checkout@v1
 
     - uses: actions/setup-java@main
-      name: Install Java 17.
+      name: Install Java 19.
       with:
         distribution: 'adopt'
-        java-version: '17'
+        java-version: '19'
     - name: Set up version of Chatty.
       run: |
-        git checkout master
+        git checkout t
         git remote add upstream https://github.com/chatty/chatty
         git fetch --all
-        git branch master --set-upstream-to upstream/master
+        git branch t --set-upstream-to upstream/master
         git status
         git status > ch.txt
         python version.py
@@ -54,15 +54,15 @@ jobs:
           writeEnv('NEW_TAG_TEXT', str(ver_data.read()));
     - name: Build with Gradle.
       run: |
-        gradlew build ^
-        && gradlew release ^
+        gradlew build --warning-mode all ^
+        && gradlew release --warning-mode all ^
         && gradlew ^
-        releaseWinSetups ^
+        releaseWinSetups --warning-mode all ^
         -PjpackagePath="%java_home%\bin\jpackage.exe" ^
         -PinnosetupPath="%programfiles(x86)%\Inno Setup 6\ISCC.exe" ^
-        -PmtPath="%programfiles(x86)%\Windows Kits\10\bin\10.0.22000.0\x64\mt.exe"
+        -PmtPath="%programfiles(x86)%\Windows Kits\10\bin\10.0.22621.0\x64\mt.exe"
     - name: Draft release.
-      uses: softprops/action-gh-release@v0.1.14
+      uses: softprops/action-gh-release@v0.1.15
       with:
         draft: true
         files: build\releases\*
