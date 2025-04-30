@@ -6,8 +6,10 @@ import chatty.gui.components.routing.RoutingTargetInfo;
 import chatty.lang.Language;
 import chatty.gui.components.settings.SettingsUtil;
 import chatty.util.dnd.DockLayout;
+import chatty.util.MiscUtil;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
@@ -96,13 +98,20 @@ public class MainMenu extends JMenuBar {
         help.setMnemonic(KeyEvent.VK_H);
         
         //------
+        // System Integration
+        //------
+        boolean foundSettings = setupMacAppMenu(actionListener);
+        
+        //------
         // Main
         //------
         addItem(main, "connect", Language.getString("menubar.dialog.connect"));
         addItem(main, "disconnect", Language.getString("menubar.action.disconnect")).setEnabled(false);
         main.addSeparator();
-        setIcon(addItem(main,"settings", Language.getString("menubar.dialog.settings"),
-                KeyEvent.VK_S), "preferences-system.png");
+        if (!foundSettings) {
+            setIcon(addItem(main,"settings", Language.getString("menubar.dialog.settings"),
+                    KeyEvent.VK_S), "preferences-system.png");
+        }
         addItem(main,"configureLogin", Language.getString("menubar.dialog.login"));
         main.addSeparator();
         addItem(main,"saveSettings", Language.getString("menubar.dialog.save"));
@@ -596,6 +605,36 @@ public class MainMenu extends JMenuBar {
             }
         }
         
+    }
+
+    //==========================
+    // System Integration
+    //==========================
+
+    /**
+     * Sets up macOS-specific application menu item for Preferences in the system menu.
+     * This handles the integration with macOS's native application menu bar.
+     * 
+     * @param actionListener The listener to handle menu actions
+     * @return true if the macOS preferences handler was successfully set up, false otherwise
+     */
+    private boolean setupMacAppMenu(ActionListener actionListener) {
+        if (!MiscUtil.OS_MAC) {
+            return false;
+        }
+
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+            if (desktop.isSupported(Desktop.Action.APP_PREFERENCES)) {
+                desktop.setPreferencesHandler(e -> {
+                    actionListener.actionPerformed(
+                        new ActionEvent(this, ActionEvent.ACTION_FIRST, "settings")
+                    );
+                });
+                return true;
+            }
+        }
+        return false;
     }
 
 }
